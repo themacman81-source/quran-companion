@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quran Companion</title>
+<meta name="description" content="A calm, privacy-first Quran companion.">
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#20231f;background:#f5f3ee}
+*{box-sizing:border-box}body{margin:0;min-height:100vh}
+header{height:68px;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:space-between;padding:0 5vw}
+.brand{font-weight:700}.mark{display:inline-grid;place-items:center;background:#356b52;color:white;border-radius:10px;width:34px;height:34px;margin-right:8px}
+button{cursor:pointer;border:1px solid #ddd;background:white;border-radius:12px;padding:10px 14px}
+main{max-width:1100px;margin:auto;padding:70px 22px}.hero{text-align:center}.hero h1{font-size:clamp(42px,7vw,76px);line-height:1;margin:18px 0}.hero span{color:#356b52}.hero p{max-width:680px;margin:0 auto 28px;line-height:1.7;color:#6f746e}
+.search{max-width:700px;margin:auto;display:flex;border:1px solid #ddd;border-radius:16px;background:#fff;padding:5px}.search input{flex:1;border:0;outline:0;padding:13px;font-size:16px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:55px}.card{background:#ffffffc9;border:1px solid #ddd;border-radius:24px;padding:22px;min-height:220px}.arabic{font-size:31px;line-height:1.9;text-align:right;direction:rtl;margin:20px 0;font-family:serif}.muted{color:#70746e;line-height:1.7}.tag{font-size:11px;color:#356b52;font-weight:700;letter-spacing:.12em}.glass{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:4px;background:#ffffffc9;border:1px solid #ddd;border-radius:18px;padding:6px;backdrop-filter:blur(18px)}.glass button{border:0;background:transparent}.glass .active{background:#356b52;color:#fff}.reader{display:none}.reader.open{display:block}.surahs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.surah{text-align:left}.ayah{border-bottom:1px solid #ddd;padding:24px 0}.ayah .arabic{font-size:34px}@media(max-width:750px){.cards,.surahs{grid-template-columns:1fr}.glass{width:calc(100% - 24px);justify-content:space-around}.glass button{padding:9px 7px;font-size:12px}}
+[data-dark=true]{background:#151816;color:#edf0ea}[data-dark=true] .card,[data-dark=true] .search,[data-dark=true] .glass{background:#1c201dcc;border-color:#333}[data-dark=true] button{background:#222;color:#edf0ea;border-color:#333}[data-dark=true] .muted{color:#a4aaa3}
+</style>
+</head>
+<body>
+<header><div class="brand"><span class="mark">ق</span>Quran Companion</div><button id="theme">◐ Theme</button></header>
+<main>
+<section class="hero" id="home"><div class="tag">READ · UNDERSTAND · REFLECT</div><h1>Understand the Quran,<br><span>one Ayah at a time.</span></h1><p>A calm place to read the Quran, explore meaning and prepare for source-backed AI study tools.</p>
+<div class="search"><input id="search" placeholder="Search a Surah…"><button onclick="openQuran()">Quran</button></div></section>
+<section class="cards">
+<article class="card"><div class="tag">AYAH OF THE DAY</div><div class="arabic">إِنَّ مَعَ الْعُسْرِ يُسْرًا</div><p class="muted">Indeed, with hardship comes ease. — Ash-Sharh 94:6</p></article>
+<article class="card"><div class="tag">AYAH OF THE WEEK</div><div class="arabic">فَفِرُّوا إِلَى اللَّهِ</div><p class="muted">So turn to Allah for refuge. — Adh-Dhariyat 51:50</p></article>
+<article class="card"><div class="tag">AYAH OF THE MONTH</div><div class="arabic">رَبَّنَا مَا خَلَقْتَ هَٰذَا بَاطِلًا</div><p class="muted">Our Lord, You have not created this without purpose. — Aal-E-Imran 3:191</p></article>
+</section>
+<section class="reader" id="reader"><h2>Quran — 114 Surahs</h2><p class="muted">Choose a Surah. The reader loads the complete Surah from the public Quran data service.</p><div id="surahs" class="surahs">Loading…</div><div id="ayahs"></div></section>
+</main>
+<nav class="glass"><button class="active" onclick="scrollHome()">⌂ Home</button><button onclick="openQuran()">⌘ Quran</button><button onclick="alert('AI is the next integration layer.')">✦ AI</button><button onclick="alert('Hadith verification is the next integration layer.')">◈ Hadith</button><button onclick="alert('Prayer times and Qibla are the next integration layer.')">☾ Prayer</button></nav>
+<script>
+const API='https://api.alquran.cloud/v1';
+const reader=document.getElementById('reader'),surahs=document.getElementById('surahs'),ayahs=document.getElementById('ayahs');
+async function openQuran(){reader.classList.add('open');reader.scrollIntoView({behavior:'smooth'});if(surahs.dataset.loaded)return;try{let r=await fetch(API+'/surah');let j=await r.json();surahs.innerHTML=j.data.map(s=>`<button class="surah" onclick="loadSurah(${s.number})"><b>${s.number}. ${s.englishName}</b><br><small>${s.name} · ${s.numberOfAyahs} Ayahs · ${s.revelationType}</small></button>`).join('');surahs.dataset.loaded='1'}catch(e){surahs.textContent='Could not load the Surah list. Check your internet connection and try again.'}}
+async function loadSurah(n){ayahs.innerHTML='<p class="muted">Loading all Ayahs…</p>';let r=await fetch(API+'/surah/'+n+'/editions/quran-uthmani,en.sahih');let j=await r.json();let ar=j.data[0],en=j.data[1];ayahs.innerHTML='<h2>'+ar.englishName+' · '+ar.numberOfAyahs+' Ayahs</h2>'+ar.ayahs.map((a,i)=>`<article class="ayah"><div class="tag">AYAH ${a.numberInSurah}</div><div class="arabic">${a.text}</div><p class="muted">${en.ayahs[i].text}</p></article>`).join('');ayahs.scrollIntoView({behavior:'smooth'})}
+function scrollHome(){document.getElementById('home').scrollIntoView({behavior:'smooth'})}
+document.getElementById('theme').onclick=()=>{let d=document.documentElement.dataset.dark==='true'?'false':'true';document.documentElement.dataset.dark=d;localStorage.dark=d};if(localStorage.dark)document.documentElement.dataset.dark=localStorage.dark;
+document.getElementById('search').addEventListener('keydown',e=>{if(e.key==='Enter')openQuran()});
+</script>
+</body></html>
